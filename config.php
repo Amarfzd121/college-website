@@ -1,6 +1,10 @@
 <?php
 // Smart Database Configuration: Supports MySQL (Localhost/Cloud) & Auto SQLite Fallback (Vercel)
 
+// Suppress deprecation notices on modern PHP runtimes (PHP 8.5+)
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+@ini_set('display_errors', '0');
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -39,10 +43,16 @@ function db() {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
 
-        // Register MySQL NOW() compatibility function in SQLite
-        $pdo->sqliteCreateFunction('NOW', function() {
-            return date('Y-m-d H:i:s');
-        });
+        // Register MySQL NOW() compatibility function in SQLite (PHP 7.4 - 8.5+ compatible)
+        if (method_exists($pdo, 'createFunction')) {
+            $pdo->createFunction('NOW', function() {
+                return date('Y-m-d H:i:s');
+            });
+        } elseif (method_exists($pdo, 'sqliteCreateFunction')) {
+            @$pdo->sqliteCreateFunction('NOW', function() {
+                return date('Y-m-d H:i:s');
+            });
+        }
 
         // Initialize schema and seed data if needed
         init_sqlite_tables($pdo);
