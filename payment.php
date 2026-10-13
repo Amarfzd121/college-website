@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'proce
 
             // Case A: Paying an existing pending fee voucher
             if ($existingFeeId > 0) {
-                $chkFee = $pdo->prepare("SELECT * FROM fees WHERE id = ? FOR UPDATE");
+                $chkFee = $pdo->prepare("SELECT * FROM fees WHERE id = ?");
                 $chkFee->execute([$existingFeeId]);
                 $feeRecord = $chkFee->fetch();
 
@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'proce
                 }
             } else {
                 // Case B: Direct Quick Pay - Check or Create Student
-                $chkStudent = $pdo->prepare("SELECT id FROM students WHERE roll_no = ? FOR UPDATE");
+                $chkStudent = $pdo->prepare("SELECT id FROM students WHERE roll_no = ?");
                 $chkStudent->execute([$rollNo]);
                 $existingStudent = $chkStudent->fetch();
 
