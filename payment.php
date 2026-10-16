@@ -839,6 +839,7 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
       <a href="index.php?page=about">About</a>
       <a href="index.php?page=courses">Courses</a>
       <a href="index.php?page=admissions">Admissions</a>
+      <a href="attendance.php" style="color: #10b981; font-weight: 700;">📅 Attendance</a>
       <a class="active highlight-nav" href="payment.php">💳 Online Payment</a>
       <a href="index.php?page=faculty">Faculty</a>
       <a href="index.php?page=contact">Contact</a>

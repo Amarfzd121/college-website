@@ -161,6 +161,7 @@ if ($searchRoll) {
       <a class="<?= $p === 'about' ? 'active' : '' ?>" href="index.php?page=about">About</a>
       <a class="<?= $p === 'courses' ? 'active' : '' ?>" href="index.php?page=courses">Courses</a>
       <a class="<?= $p === 'admissions' ? 'active' : '' ?>" href="index.php?page=admissions">Admissions</a>
+      <a href="attendance.php" style="color: #10b981; font-weight: 700;">📅 Attendance</a>
       <a class="highlight-nav" href="payment.php">💳 Online Payment</a>
       <a class="<?= $p === 'faculty' ? 'active' : '' ?>" href="index.php?page=faculty">Faculty</a>
       <a class="<?= $p === 'contact' ? 'active' : '' ?>" href="index.php?page=contact">Contact</a>
@@ -203,6 +204,7 @@ if ($searchRoll) {
 
           <div class="hero-actions">
             <a class="btn" href="index.php?page=admissions">Apply Online Now →</a>
+            <a class="btn btn-secondary" href="attendance.php" style="border-color: rgba(16, 185, 129, 0.4); color: #059669; font-weight: 700;">📅 Student Attendance</a>
             <a class="btn btn-secondary" href="payment.php">💳 Online Payment</a>
             <a class="btn btn-secondary" href="index.php?page=courses">Explore Programs</a>
           </div>
@@ -1035,6 +1037,7 @@ if ($searchRoll) {
       <div class="footer-col">
         <h4>Student Services</h4>
         <ul>
+          <li><a href="attendance.php" style="color: #34d399; font-weight: 700;">📅 Attendance Portal</a></li>
           <li><a href="payment.php">Pay Online Fees</a></li>
           <li><a href="payment.php?active=search&search_query=BCA202601">Check Due Invoices</a></li>
           <li><a href="payment.php?active=track">Download E-Receipt</a></li>

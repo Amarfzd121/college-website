@@ -126,6 +126,16 @@ function init_sqlite_tables(PDO $pdo) {
         status VARCHAR(30) NOT NULL DEFAULT 'New',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS attendance (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        student_id INTEGER NOT NULL,
+        attendance_date DATE NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'Present',
+        remarks VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(student_id, attendance_date)
+    );
     ";
 
     $pdo->exec($schema);
@@ -158,4 +168,18 @@ function init_sqlite_tables(PDO $pdo) {
 
     $pdo->exec("INSERT OR IGNORE INTO inquiries (id, name, email, phone, subject, message, status) VALUES
         (1, 'Rajesh Khanna', 'rajesh.k@example.com', '9844556677', 'Hostel Facility Query', 'Does the college provide campus hostel facilities for first-year outstation students?', 'New')");
+
+    $pdo->exec("INSERT OR IGNORE INTO attendance (student_id, attendance_date, status, remarks) VALUES
+        (1, date('now'), 'Present', 'Regular Class'),
+        (1, date('now', '-1 day'), 'Present', 'Regular Class'),
+        (1, date('now', '-2 day'), 'Present', 'Lab Practical'),
+        (1, date('now', '-3 day'), 'Absent', 'Uninformed'),
+        (1, date('now', '-4 day'), 'Present', 'Regular Class'),
+        (2, date('now'), 'Present', 'Regular Class'),
+        (2, date('now', '-1 day'), 'Present', 'Regular Class'),
+        (2, date('now', '-2 day'), 'Present', 'Lab Practical'),
+        (3, date('now'), 'Absent', 'Absent'),
+        (3, date('now', '-1 day'), 'Absent', 'Absent'),
+        (4, date('now'), 'Present', 'Regular Class')");
 }
+

@@ -20,8 +20,16 @@ A modern, full-stack, responsive college web application built with **PHP**, **M
   - Debit/Credit card payment simulation with live interactive card preview.
   - Net Banking & Edu EMI channels.
   - Official printable/downloadable institutional fee receipts with authentication QR code.
+- **📅 Student Attendance Portal & Exam Eligibility Radar**:
+  - Live Roll Number attendance search with animated circular percentage meter.
+  - Mandatory university 75% examination eligibility indicator (Eligible vs Shortage warnings).
+  - Lecture statistics: Total classes held, attended, absent, approved leaves, and late entries.
+  - Chronological day-by-day attendance register.
+  - Printable official attendance slips with signature verification blocks.
 - **🔐 Administrative Control Panel**:
-  - Executive Dashboard with real-time KPI metrics (Revenue collected, pending dues, enrollment counters).
+  - Executive Dashboard with real-time KPI metrics (Revenue collected, pending dues, enrollment counters, daily attendance rate).
+  - Daily Attendance Roll Call Sheet with one-click bulk marking ("Mark All Present/Absent/Late").
+  - Cumulative Student Attendance Radar & Shortage Monitor with color-coded progress bars.
   - Branch & Department Management (Add/Delete).
   - Student Records Directory (Add/Delete/List).
   - Fee Invoicing & Desk Cash Collection (Mark Paid, record transactions).
@@ -59,8 +67,11 @@ A modern, full-stack, responsive college web application built with **PHP**, **M
 
 ### 4. Run the Website
 - **Main Website**: [http://localhost/college_website/](http://localhost/college_website/)
+- **Student Attendance Portal**: [http://localhost/college_website/attendance.php](http://localhost/college_website/attendance.php)
 - **Fee Payment Portal**: [http://localhost/college_website/payment.php](http://localhost/college_website/payment.php)
-- **Admin Login**: [http://localhost/college_website/admin/login.php](http://localhost/college_website/admin/login.php)
+- **Admin Control Panel**: [http://localhost/college_website/admin/login.php](http://localhost/college_website/admin/login.php)
+- **Admin Attendance Management**: [http://localhost/college_website/admin/dashboard.php?s=attendance](http://localhost/college_website/admin/dashboard.php?s=attendance)
+
 
 ---
 

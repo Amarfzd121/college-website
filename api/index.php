@@ -26,5 +26,11 @@ if (strpos($path, '/payment') === 0) {
     exit;
 }
 
-// 3. Main College Website (Default Route)
+// 3. Student Attendance Portal Route
+if (strpos($path, '/attendance') === 0) {
+    require __DIR__ . '/../attendance.php';
+    exit;
+}
+
+// 4. Main College Website (Default Route)
 require __DIR__ . '/../index.php';

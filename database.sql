@@ -94,3 +94,33 @@ INSERT IGNORE INTO admissions (id, application_no, full_name, email, phone, cour
 -- Sample Inquiries
 INSERT IGNORE INTO inquiries (id, name, email, phone, subject, message, status) VALUES
 (1, 'Rajesh Khanna', 'rajesh.k@example.com', '9844556677', 'Hostel Facility Query', 'Does the college provide campus hostel facilities for first-year outstation students?', 'New');
+
+-- Attendance Table
+CREATE TABLE IF NOT EXISTS attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    attendance_date DATE NOT NULL,
+    status ENUM('Present', 'Absent', 'Leave', 'Late') NOT NULL DEFAULT 'Present',
+    remarks VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_student_date (student_id, attendance_date),
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+);
+
+-- Seed Attendance Records
+INSERT IGNORE INTO attendance (student_id, attendance_date, status, remarks) VALUES
+(1, CURDATE(), 'Present', 'Regular Class'),
+(1, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 'Present', 'Regular Class'),
+(1, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 'Present', 'Lab Practical'),
+(1, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 'Absent', 'Uninformed'),
+(1, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 'Present', 'Regular Class'),
+(2, CURDATE(), 'Present', 'Regular Class'),
+(2, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 'Present', 'Regular Class'),
+(2, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 'Present', 'Lab Practical'),
+(2, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 'Present', 'Regular Class'),
+(3, CURDATE(), 'Absent', 'Absent'),
+(3, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 'Absent', 'Absent'),
+(3, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 'Present', 'Seminar'),
+(4, CURDATE(), 'Present', 'Regular Class'),
+(4, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 'Present', 'Regular Class');
+
