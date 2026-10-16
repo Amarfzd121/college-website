@@ -77,7 +77,8 @@ INSERT IGNORE INTO students (id, student_name, roll_no, email, phone, branch_id)
 (1, 'Aarav Sharma', 'BCA202601', 'aarav.sharma@example.com', '9876543210', 1),
 (2, 'Priya Patel', 'BCA202602', 'priya.patel@example.com', '9812345678', 1),
 (3, 'Rohan Verma', 'BBA202601', 'rohan.verma@example.com', '9898989898', 2),
-(4, 'Ananya Singh', 'BCOM202601', 'ananya.singh@example.com', '9765432109', 3);
+(4, 'Ananya Singh', 'BCOM202601', 'ananya.singh@example.com', '9765432109', 3),
+(5, 'Amar Singh', 'BCA202401', 'amar.singhbca24@smslucknow.ac.in', '9876543210', 1);
 
 -- Sample Fees & Transactions
 INSERT IGNORE INTO fees (id, student_id, amount, status, transaction_id, payment_mode, payment_date, remarks) VALUES
@@ -85,7 +86,8 @@ INSERT IGNORE INTO fees (id, student_id, amount, status, transaction_id, payment
 (2, 2, 24500.00, 'Paid', 'TXN-2026-984321', 'UPI (Google Pay)', NOW(), 'Semester 5 Tuition Fee'),
 (3, 3, 31000.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester 3 Management Fee'),
 (4, 4, 18500.00, 'Paid', 'TXN-2026-773412', 'Net Banking HDFC', NOW(), 'Semester 1 Admission Fee'),
-(5, 2, 2500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester Examination Fee');
+(5, 2, 2500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester Examination Fee'),
+(6, 5, 2500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester Examination Fee');
 
 -- Sample Online Admission Applications
 INSERT IGNORE INTO admissions (id, application_no, full_name, email, phone, course_name, qualification, score_percent, address, status) VALUES

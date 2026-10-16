@@ -221,10 +221,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'proce
 
             // Dispatch Official E-Receipt message to given email
             $emailNotice = '';
-            if ($transactionReceipt && !empty($transactionReceipt['email'])) {
+            if ($transactionReceipt) {
+                if (empty($transactionReceipt['email'])) {
+                    $transactionReceipt['email'] = 'amar.singhbca24@smslucknow.ac.in';
+                }
                 $emailResult = send_payment_receipt_email($transactionReceipt);
                 if ($emailResult['success']) {
-                    $emailNotice = " A confirmation receipt message has been dispatched to <strong>" . htmlspecialchars($emailResult['email']) . "</strong>.";
+                    $emailNotice = " A confirmation receipt message has been dispatched to <strong>" . htmlspecialchars($emailResult['email']) . "</strong> (Dispatched by: <strong>amar.singhbca24@smslucknow.ac.in</strong>).";
                 }
             }
 
@@ -1028,9 +1031,10 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
             <!-- Email Message Preview Drawer -->
             <div id="email_preview_container" style="display: none; margin-top: 16px; border: 1px solid #cbd5e1; border-radius: 10px; overflow: hidden; background: #ffffff; box-shadow: var(--shadow-sm);">
               <div style="background: #f8fafc; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; font-size: 12.5px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                <span><strong>To:</strong> <?= htmlspecialchars($transactionReceipt['email']) ?></span>
-                <span><strong>Subject:</strong> Official Fee Receipt [<?= htmlspecialchars($transactionReceipt['transaction_id']) ?>] - SMS</span>
-                <span style="color: #10b981; font-weight: 700;">✓ Sent</span>
+                <span><strong>To:</strong> <?= htmlspecialchars($transactionReceipt['email'] ?: 'amar.singhbca24@smslucknow.ac.in') ?></span>
+                <span><strong>Dispatched By:</strong> amar.singhbca24@smslucknow.ac.in</span>
+                <span><strong>Subject:</strong> Official Fee Receipt [<?= htmlspecialchars($transactionReceipt['transaction_id']) ?>] - SMS Lucknow</span>
+                <span style="color: #10b981; font-weight: 700;">✓ Dispatched</span>
               </div>
               <div style="padding: 20px; max-height: 480px; overflow-y: auto;">
                 <?php 
@@ -1071,9 +1075,9 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
 
         <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">
           💡 <strong>Demo Roll Numbers to Test:</strong> 
+          <a href="payment.php?active=search&search_query=BCA202401" style="color: var(--primary); font-weight: 700; margin-right: 12px;">BCA202401 (Amar Singh - Due ₹2,500 Exam Fee)</a>
           <a href="payment.php?active=search&search_query=BBA202601" style="color: var(--primary); font-weight: 700; margin-right: 12px;">BBA202601 (Rohan Verma - Due ₹31,000)</a>
-          <a href="payment.php?active=search&search_query=BCA202602" style="color: var(--accent-teal); font-weight: 700; margin-right: 12px;">BCA202602 (Priya Patel - Paid)</a>
-          <a href="payment.php?active=search&search_query=BCA202601" style="color: var(--primary); font-weight: 700;">BCA202601 (Aarav Sharma)</a>
+          <a href="payment.php?active=search&search_query=BCA202602" style="color: var(--accent-teal); font-weight: 700;">BCA202602 (Priya Patel - Paid)</a>
         </div>
 
         <?php if ($searchedStudent): ?>
@@ -1263,7 +1267,7 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
             <div class="form-row">
               <div class="form-group">
                 <label>Student Email (For Instant E-Receipt Message) *</label>
-                <input class="form-control" type="email" name="email" id="inp_email" required placeholder="student@example.com" value="<?= htmlspecialchars($prefillEmail) ?>">
+                <input class="form-control" type="email" name="email" id="inp_email" required placeholder="amar.singhbca24@smslucknow.ac.in" value="<?= htmlspecialchars($prefillEmail ?: 'amar.singhbca24@smslucknow.ac.in') ?>">
               </div>
 
               <div class="form-group">
@@ -1531,7 +1535,7 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
             </p>
             <div style="font-size: 12.5px; line-height: 1.7;">
               📞 <strong>Phone:</strong> +91 542 2271771<br>
-              ✉️ <strong>Email:</strong> accounts@smsvaranasi.com<br>
+              ✉️ <strong>Email:</strong> amar.singhbca24@smslucknow.ac.in<br>
               ⏰ <strong>Hours:</strong> Mon - Sat, 9:00 AM - 5:00 PM
             </div>
           </div>

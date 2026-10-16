@@ -103,10 +103,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'pay_f
             $receiptQuery->execute([$feeId]);
             $transactionReceipt = $receiptQuery->fetch();
             $emailNotice = '';
-            if ($transactionReceipt && !empty($transactionReceipt['email'])) {
+            if ($transactionReceipt) {
+                if (empty($transactionReceipt['email'])) {
+                    $transactionReceipt['email'] = 'amar.singhbca24@smslucknow.ac.in';
+                }
                 $emailResult = send_payment_receipt_email($transactionReceipt);
                 if ($emailResult['success']) {
-                    $emailNotice = " An official confirmation receipt has been dispatched to <strong>" . htmlspecialchars($emailResult['email']) . "</strong>.";
+                    $emailNotice = " An official confirmation receipt has been dispatched to <strong>" . htmlspecialchars($emailResult['email']) . "</strong> (Dispatched by: <strong>amar.singhbca24@smslucknow.ac.in</strong>).";
                 }
             }
             $alert_success = "Transaction successful! Fee paid and verified." . $emailNotice . " Receipt generated below.";

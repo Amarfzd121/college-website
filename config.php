@@ -154,14 +154,16 @@ function init_sqlite_tables(PDO $pdo) {
         (1, 'Aarav Sharma', 'BCA202601', 'aarav.sharma@example.com', '9876543210', 1),
         (2, 'Priya Patel', 'BCA202602', 'priya.patel@example.com', '9812345678', 1),
         (3, 'Rohan Verma', 'BBA202601', 'rohan.verma@example.com', '9898989898', 2),
-        (4, 'Ananya Singh', 'BCOM202601', 'ananya.singh@example.com', '9765432109', 3)");
+        (4, 'Ananya Singh', 'BCOM202601', 'ananya.singh@example.com', '9765432109', 3),
+        (5, 'Amar Singh', 'BCA202401', 'amar.singhbca24@smslucknow.ac.in', '9876543210', 1)");
 
     $pdo->exec("INSERT OR IGNORE INTO fees (id, student_id, amount, status, transaction_id, payment_mode, payment_date, remarks) VALUES
         (1, 1, 24500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester 5 Tuition Fee'),
         (2, 2, 24500.00, 'Paid', 'TXN-2026-984321', 'UPI (Google Pay)', datetime('now'), 'Semester 5 Tuition Fee'),
         (3, 3, 31000.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester 3 Management Fee'),
         (4, 4, 18500.00, 'Paid', 'TXN-2026-773412', 'Net Banking HDFC', datetime('now'), 'Semester 1 Admission Fee'),
-        (5, 2, 2500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester Examination Fee')");
+        (5, 2, 2500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester Examination Fee'),
+        (6, 5, 2500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester Examination Fee')");
 
     $pdo->exec("INSERT OR IGNORE INTO admissions (id, application_no, full_name, email, phone, course_name, qualification, score_percent, address, status) VALUES
         (1, 'APP-2026-1042', 'Neha Gupta', 'neha.gupta@example.com', '9822334455', 'Bachelor of Computer Applications (BCA)', '12th Science / Math', 88.50, 'Lucknow, Uttar Pradesh', 'Approved'),
@@ -181,35 +183,37 @@ function init_sqlite_tables(PDO $pdo) {
         (2, date('now', '-2 day'), 'Present', 'Lab Practical'),
         (3, date('now'), 'Absent', 'Absent'),
         (3, date('now', '-1 day'), 'Absent', 'Absent'),
-        (4, date('now'), 'Present', 'Regular Class')");
+        (4, date('now'), 'Present', 'Regular Class'),
+        (5, date('now'), 'Present', 'Regular Class'),
+        (5, date('now', '-1 day'), 'Present', 'Regular Class'),
+        (5, date('now', '-2 day'), 'Present', 'Lab Practical')");
 }
 
 /**
- * Dispatches an official electronic fee payment receipt to the student's email address
- *
+ * Send Payment Receipt Email Notification
+ * Dispatches an official HTML receipt to the student's email,
+ * and maintains amar.singhbca24@smslucknow.ac.in as official dispatcher and audit copy.
+ * 
  * @param array $receipt Array containing student and transaction details
- * @return array Status of email dispatch ['success' => bool, 'message' => string, 'email' => string]
+ * @return array Status of email dispatch ['success' => bool, 'message' => string, 'email' => string, 'dispatcher' => string]
  */
 function send_payment_receipt_email(array $receipt) {
+    $dispatcherEmail = 'amar.singhbca24@smslucknow.ac.in';
     $to = trim($receipt['email'] ?? '');
     if (!$to || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
-        return [
-            'success' => false,
-            'message' => 'No valid email address provided.',
-            'email' => $to
-        ];
+        $to = $dispatcherEmail;
     }
 
     $studentName = $receipt['student_name'] ?? 'Student';
     $rollNo = $receipt['roll_no'] ?? 'N/A';
-    $branchName = $receipt['branch_name'] ?? 'General Studies';
+    $branchName = $receipt['branch_name'] ?? 'Computer Applications & IT';
     $amount = number_format((float)($receipt['amount'] ?? 0), 2);
     $txnId = $receipt['transaction_id'] ?? ('TXN-' . date('Ymd'));
     $purpose = $receipt['remarks'] ?: 'College Fee Payment';
     $paymentMode = $receipt['payment_mode'] ?: 'Online Gateway';
     $dateStr = !empty($receipt['payment_date']) ? date('d M Y, h:i A', strtotime($receipt['payment_date'])) : date('d M Y, h:i A');
 
-    $subject = "Official Fee Receipt [{$txnId}] - School of Management Sciences (SMS)";
+    $subject = "Official Fee Receipt [{$txnId}] - School of Management Sciences Lucknow (SMS)";
 
     // Responsive HTML Email Template
     $body = '<!DOCTYPE html>
@@ -239,7 +243,7 @@ function send_payment_receipt_email(array $receipt) {
 <body>
   <div class="email-container">
     <div class="email-header">
-      <h1>School of Management Sciences</h1>
+      <h1>School of Management Sciences (SMS Lucknow)</h1>
       <p>Institutional Digital Fee Payment Gateway</p>
     </div>
     <div class="email-body">
@@ -295,8 +299,8 @@ function send_payment_receipt_email(array $receipt) {
       </div>
     </div>
     <div class="email-footer">
-      <strong>School of Management Sciences (SMS)</strong><br>
-      Campus Accounts & Finance Division • All Rights Reserved.<br>
+      <strong>School of Management Sciences (SMS Lucknow)</strong><br>
+      Campus Accounts & Finance Division • Dispatched via: ' . htmlspecialchars($dispatcherEmail) . '<br>
       This is an automated institutional transaction notification.
     </div>
   </div>
@@ -307,16 +311,25 @@ function send_payment_receipt_email(array $receipt) {
     $headers = [];
     $headers[] = 'MIME-Version: 1.0';
     $headers[] = 'Content-type: text/html; charset=UTF-8';
-    $headers[] = 'From: SMS College Portal <noreply@sms-college.edu>';
-    $headers[] = 'Reply-To: accounts@sms-college.edu';
+    $headers[] = 'From: SMS Lucknow Accounts Portal <' . $dispatcherEmail . '>';
+    $headers[] = 'Reply-To: ' . $dispatcherEmail;
+    if (strtolower($to) !== strtolower($dispatcherEmail)) {
+        $headers[] = 'Bcc: ' . $dispatcherEmail;
+    }
     $headers[] = 'X-Mailer: PHP/' . phpversion();
 
     $headerStr = implode("\r\n", $headers);
     $sent = @mail($to, $subject, $body, $headerStr);
 
+    // If student email is distinct, also deliver directly to dispatcher copy
+    if (strtolower($to) !== strtolower($dispatcherEmail)) {
+        @mail($dispatcherEmail, "[Audit Copy] " . $subject, $body, $headerStr);
+    }
+
     // Save dispatch record in session for instant UI notification and preview
     $_SESSION['last_sent_receipt_email'] = [
         'recipient' => $to,
+        'dispatcher' => $dispatcherEmail,
         'subject' => $subject,
         'txn_id' => $txnId,
         'amount' => $amount,
@@ -330,6 +343,7 @@ function send_payment_receipt_email(array $receipt) {
         'success' => true,
         'sent' => (bool)$sent,
         'email' => $to,
+        'dispatcher' => $dispatcherEmail,
         'subject' => $subject
     ];
 }
