@@ -102,7 +102,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'pay_f
             ");
             $receiptQuery->execute([$feeId]);
             $transactionReceipt = $receiptQuery->fetch();
-            $alert_success = "Transaction successful! Fee paid and verified. Receipt generated below.";
+            $emailNotice = '';
+            if ($transactionReceipt && !empty($transactionReceipt['email'])) {
+                $emailResult = send_payment_receipt_email($transactionReceipt);
+                if ($emailResult['success']) {
+                    $emailNotice = " An official confirmation receipt has been dispatched to <strong>" . htmlspecialchars($emailResult['email']) . "</strong>.";
+                }
+            }
+            $alert_success = "Transaction successful! Fee paid and verified." . $emailNotice . " Receipt generated below.";
             $searchRoll = $transactionReceipt['roll_no'] ?? '';
         } catch (Throwable $e) {
             $alert_error = "Transaction failed: " . htmlspecialchars($e->getMessage());

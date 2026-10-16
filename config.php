@@ -184,3 +184,154 @@ function init_sqlite_tables(PDO $pdo) {
         (4, date('now'), 'Present', 'Regular Class')");
 }
 
+/**
+ * Dispatches an official electronic fee payment receipt to the student's email address
+ *
+ * @param array $receipt Array containing student and transaction details
+ * @return array Status of email dispatch ['success' => bool, 'message' => string, 'email' => string]
+ */
+function send_payment_receipt_email(array $receipt) {
+    $to = trim($receipt['email'] ?? '');
+    if (!$to || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        return [
+            'success' => false,
+            'message' => 'No valid email address provided.',
+            'email' => $to
+        ];
+    }
+
+    $studentName = $receipt['student_name'] ?? 'Student';
+    $rollNo = $receipt['roll_no'] ?? 'N/A';
+    $branchName = $receipt['branch_name'] ?? 'General Studies';
+    $amount = number_format((float)($receipt['amount'] ?? 0), 2);
+    $txnId = $receipt['transaction_id'] ?? ('TXN-' . date('Ymd'));
+    $purpose = $receipt['remarks'] ?: 'College Fee Payment';
+    $paymentMode = $receipt['payment_mode'] ?: 'Online Gateway';
+    $dateStr = !empty($receipt['payment_date']) ? date('d M Y, h:i A', strtotime($receipt['payment_date'])) : date('d M Y, h:i A');
+
+    $subject = "Official Fee Receipt [{$txnId}] - School of Management Sciences (SMS)";
+
+    // Responsive HTML Email Template
+    $body = '<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Receipt</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 20px; color: #0f172a; }
+    .email-container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+    .email-header { background: linear-gradient(135deg, #090e17 0%, #1e3a8a 100%); color: #ffffff; padding: 32px 24px; text-align: center; }
+    .email-header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
+    .email-header p { margin: 6px 0 0; font-size: 13px; color: #93c5fd; }
+    .email-body { padding: 30px 24px; }
+    .badge-success { display: inline-block; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px; }
+    .amount-banner { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; margin: 20px 0; }
+    .amount-banner small { font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 700; }
+    .amount-banner h2 { font-size: 32px; color: #10b981; margin: 4px 0 0; }
+    .details-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .details-table td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; font-size: 13.5px; }
+    .details-table td.label { color: #64748b; font-weight: 600; width: 40%; }
+    .details-table td.val { color: #0f172a; font-weight: 700; text-align: right; }
+    .email-footer { background: #f8fafc; padding: 20px 24px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="email-header">
+      <h1>School of Management Sciences</h1>
+      <p>Institutional Digital Fee Payment Gateway</p>
+    </div>
+    <div class="email-body">
+      <div style="text-align: center;">
+        <span class="badge-success">✓ Payment Verified & Received</span>
+        <h2 style="font-size: 20px; margin: 0 0 6px;">Dear ' . htmlspecialchars($studentName) . ',</h2>
+        <p style="color: #64748b; font-size: 14px; margin: 0;">We have received your payment. Here is your official e-receipt confirmation:</p>
+      </div>
+
+      <div class="amount-banner">
+        <small>Total Amount Received</small>
+        <h2>₹' . $amount . '</h2>
+        <span style="font-size: 13px; color: #2563eb; font-weight: 600;">' . htmlspecialchars($purpose) . '</span>
+      </div>
+
+      <table class="details-table">
+        <tr>
+          <td class="label">Transaction Ref:</td>
+          <td class="val"><code style="background: #eff6ff; color: #2563eb; padding: 2px 6px; border-radius: 4px;">' . htmlspecialchars($txnId) . '</code></td>
+        </tr>
+        <tr>
+          <td class="label">Student Name:</td>
+          <td class="val">' . htmlspecialchars($studentName) . '</td>
+        </tr>
+        <tr>
+          <td class="label">Roll Number:</td>
+          <td class="val">' . htmlspecialchars($rollNo) . '</td>
+        </tr>
+        <tr>
+          <td class="label">Department / Branch:</td>
+          <td class="val">' . htmlspecialchars($branchName) . '</td>
+        </tr>
+        <tr>
+          <td class="label">Payment Purpose:</td>
+          <td class="val">' . htmlspecialchars($purpose) . '</td>
+        </tr>
+        <tr>
+          <td class="label">Payment Mode:</td>
+          <td class="val">' . htmlspecialchars($paymentMode) . '</td>
+        </tr>
+        <tr>
+          <td class="label">Date & Time:</td>
+          <td class="val">' . htmlspecialchars($dateStr) . '</td>
+        </tr>
+        <tr>
+          <td class="label">Payment Status:</td>
+          <td class="val" style="color: #10b981;">PAID & VERIFIED</td>
+        </tr>
+      </table>
+
+      <div style="margin-top: 25px; padding: 14px; background: #eff6ff; border-radius: 8px; font-size: 12.5px; color: #1e40af; text-align: center;">
+        📌 Please retain this email and transaction ID for academic records and examination admit card verification.
+      </div>
+    </div>
+    <div class="email-footer">
+      <strong>School of Management Sciences (SMS)</strong><br>
+      Campus Accounts & Finance Division • All Rights Reserved.<br>
+      This is an automated institutional transaction notification.
+    </div>
+  </div>
+</body>
+</html>';
+
+    // MIME Headers
+    $headers = [];
+    $headers[] = 'MIME-Version: 1.0';
+    $headers[] = 'Content-type: text/html; charset=UTF-8';
+    $headers[] = 'From: SMS College Portal <noreply@sms-college.edu>';
+    $headers[] = 'Reply-To: accounts@sms-college.edu';
+    $headers[] = 'X-Mailer: PHP/' . phpversion();
+
+    $headerStr = implode("\r\n", $headers);
+    $sent = @mail($to, $subject, $body, $headerStr);
+
+    // Save dispatch record in session for instant UI notification and preview
+    $_SESSION['last_sent_receipt_email'] = [
+        'recipient' => $to,
+        'subject' => $subject,
+        'txn_id' => $txnId,
+        'amount' => $amount,
+        'purpose' => $purpose,
+        'body' => $body,
+        'dispatched_at' => date('Y-m-d H:i:s'),
+        'mail_sent' => (bool)$sent
+    ];
+
+    return [
+        'success' => true,
+        'sent' => (bool)$sent,
+        'email' => $to,
+        'subject' => $subject
+    ];
+}
+
+

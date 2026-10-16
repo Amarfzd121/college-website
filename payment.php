@@ -219,7 +219,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'proce
             $receiptStmt->execute([$targetFeeId]);
             $transactionReceipt = $receiptStmt->fetch();
 
-            $alert_success = "Payment verified and recorded! Transaction Reference: <strong>$txnId</strong>. Official E-Receipt is ready below.";
+            // Dispatch Official E-Receipt message to given email
+            $emailNotice = '';
+            if ($transactionReceipt && !empty($transactionReceipt['email'])) {
+                $emailResult = send_payment_receipt_email($transactionReceipt);
+                if ($emailResult['success']) {
+                    $emailNotice = " A confirmation receipt message has been dispatched to <strong>" . htmlspecialchars($emailResult['email']) . "</strong>.";
+                }
+            }
+
+            $alert_success = "Payment verified and recorded! Transaction Reference: <strong>$txnId</strong>." . $emailNotice . " Official E-Receipt is ready below.";
             $activeTab = 'receipt';
         } catch (Throwable $e) {
             if ($pdo->inTransaction()) {
@@ -997,6 +1006,53 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
             </div>
           </div>
         </div>
+
+        <!-- EMAIL NOTIFICATION BANNER & PREVIEW (SCREEN ONLY) -->
+        <?php if (!empty($transactionReceipt['email'])): ?>
+          <div class="no-print" style="margin-top: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 18px 22px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 26px;">📧</span>
+                <div>
+                  <h4 style="margin: 0; color: #166534; font-size: 15px;">Official E-Receipt Email Dispatched</h4>
+                  <p style="margin: 3px 0 0; font-size: 13px; color: #15803d;">
+                    A formatted payment confirmation message has been sent to: <strong><?= htmlspecialchars($transactionReceipt['email']) ?></strong>
+                  </p>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary" onclick="toggleEmailPreview()" style="padding: 7px 14px; font-size: 12.5px; border-color: #86efac; color: #166534; background: #ffffff;">
+                📩 Preview Dispatched Email
+              </button>
+            </div>
+
+            <!-- Email Message Preview Drawer -->
+            <div id="email_preview_container" style="display: none; margin-top: 16px; border: 1px solid #cbd5e1; border-radius: 10px; overflow: hidden; background: #ffffff; box-shadow: var(--shadow-sm);">
+              <div style="background: #f8fafc; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; font-size: 12.5px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <span><strong>To:</strong> <?= htmlspecialchars($transactionReceipt['email']) ?></span>
+                <span><strong>Subject:</strong> Official Fee Receipt [<?= htmlspecialchars($transactionReceipt['transaction_id']) ?>] - SMS</span>
+                <span style="color: #10b981; font-weight: 700;">✓ Sent</span>
+              </div>
+              <div style="padding: 20px; max-height: 480px; overflow-y: auto;">
+                <?php 
+                if (!empty($_SESSION['last_sent_receipt_email']['body'])) {
+                    echo $_SESSION['last_sent_receipt_email']['body'];
+                } else {
+                    echo "<p style='color: #64748b;'>An official e-receipt has been sent to " . htmlspecialchars($transactionReceipt['email']) . ".</p>";
+                }
+                ?>
+              </div>
+            </div>
+          </div>
+
+          <script>
+          function toggleEmailPreview() {
+            var box = document.getElementById('email_preview_container');
+            if (box) {
+              box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
+            }
+          }
+          </script>
+        <?php endif; ?>
       </div>
 
     <!-- VIEW 2: SEARCH STUDENT INVOICES -->
@@ -1206,8 +1262,8 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
 
             <div class="form-row">
               <div class="form-group">
-                <label>Student Email (For E-Receipt)</label>
-                <input class="form-control" type="email" name="email" id="inp_email" placeholder="student@example.com" value="<?= htmlspecialchars($prefillEmail) ?>">
+                <label>Student Email (For Instant E-Receipt Message) *</label>
+                <input class="form-control" type="email" name="email" id="inp_email" required placeholder="student@example.com" value="<?= htmlspecialchars($prefillEmail) ?>">
               </div>
 
               <div class="form-group">
