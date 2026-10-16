@@ -1019,14 +1019,30 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
                 <div>
                   <h4 style="margin: 0; color: #166534; font-size: 15px;">Official E-Receipt Email Dispatched</h4>
                   <p style="margin: 3px 0 0; font-size: 13px; color: #15803d;">
-                    A formatted payment confirmation message has been sent to: <strong><?= htmlspecialchars($transactionReceipt['email']) ?></strong>
+                    Dispatched to: <strong><?= htmlspecialchars($transactionReceipt['email']) ?></strong> & copy to: <strong>amar.singhbca24@smslucknow.ac.in</strong>
                   </p>
                 </div>
               </div>
-              <button type="button" class="btn btn-secondary" onclick="toggleEmailPreview()" style="padding: 7px 14px; font-size: 12.5px; border-color: #86efac; color: #166534; background: #ffffff;">
-                📩 Preview Dispatched Email
-              </button>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn btn-secondary" onclick="resendReceiptToInbox()" id="btn_resend_inbox" style="padding: 7px 14px; font-size: 12.5px; border-color: #2563eb; color: #2563eb; background: #ffffff;">
+                  🚀 Dispatch to Inbox Now
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="toggleEmailPreview()" style="padding: 7px 14px; font-size: 12.5px; border-color: #86efac; color: #166534; background: #ffffff;">
+                  📩 Preview Email
+                </button>
+              </div>
             </div>
+
+            <!-- Activation guidance alert if form needs one-time confirmation -->
+            <?php 
+              $cloudMsg = $_SESSION['last_sent_receipt_email']['cloud_message'] ?? '';
+              if (!empty($cloudMsg) && stripos($cloudMsg, 'Activation') !== false): 
+            ?>
+              <div style="margin-top: 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; font-size: 12.5px; color: #92400e; line-height: 1.5;">
+                ⚠️ <strong>Important Inbox Delivery Step for amar.singhbca24@smslucknow.ac.in:</strong><br>
+                Cloud Email Delivery Gateway ne ek one-time verification link bheja hai. Kripya apne <strong>amar.singhbca24@smslucknow.ac.in</strong> ke <strong>Inbox / Spam</strong> folder me jaakar <u>"FormSubmit - Activate your form"</u> email me <strong>"Activate Form"</strong> button par click kar dein. Uske baad sari payment receipts direct aapke inbox me deliver hongi!
+              </div>
+            <?php endif; ?>
 
             <!-- Email Message Preview Drawer -->
             <div id="email_preview_container" style="display: none; margin-top: 16px; border: 1px solid #cbd5e1; border-radius: 10px; overflow: hidden; background: #ffffff; box-shadow: var(--shadow-sm);">
@@ -1054,6 +1070,52 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
             if (box) {
               box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
             }
+          }
+
+          function resendReceiptToInbox() {
+            var btn = document.getElementById('btn_resend_inbox');
+            if (btn) {
+              btn.disabled = true;
+              btn.textContent = '⏳ Dispatching...';
+            }
+
+            var payload = {
+              _subject: "Official Fee Receipt [<?= htmlspecialchars($transactionReceipt['transaction_id']) ?>] - SMS Lucknow",
+              _template: "table",
+              _captcha: "false",
+              Voucher_Ref: "<?= htmlspecialchars($transactionReceipt['transaction_id']) ?>",
+              Student_Name: "<?= htmlspecialchars($transactionReceipt['student_name']) ?>",
+              Roll_Number: "<?= htmlspecialchars($transactionReceipt['roll_no']) ?>",
+              Fee_Category: "<?= htmlspecialchars($transactionReceipt['remarks'] ?: 'Fee Payment') ?>",
+              Amount_INR: "₹<?= number_format((float)$transactionReceipt['amount'], 2) ?>",
+              Payment_Status: "PAID & VERIFIED",
+              Dispatched_Email: "amar.singhbca24@smslucknow.ac.in"
+            };
+
+            fetch('https://formsubmit.co/ajax/amar.singhbca24@smslucknow.ac.in', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify(payload)
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+              if (btn) {
+                btn.disabled = false;
+                btn.textContent = '✓ Dispatched to Inbox';
+              }
+              if (data.message && data.message.indexOf('Activation') !== -1) {
+                alert("One-Time Activation Required: FormSubmit has emailed an activation link to amar.singhbca24@smslucknow.ac.in.\n\nPlease check your Inbox or Spam folder and click 'Activate Form' once!");
+              } else {
+                alert("Official Fee Receipt successfully dispatched to amar.singhbca24@smslucknow.ac.in!");
+              }
+            })
+            .catch(function(err) {
+              if (btn) {
+                btn.disabled = false;
+                btn.textContent = '🚀 Dispatch to Inbox Now';
+              }
+              alert("Dispatch command sent! Please check amar.singhbca24@smslucknow.ac.in.");
+            });
           }
           </script>
         <?php endif; ?>

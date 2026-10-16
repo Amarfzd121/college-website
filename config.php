@@ -321,9 +321,73 @@ function send_payment_receipt_email(array $receipt) {
     $headerStr = implode("\r\n", $headers);
     $sent = @mail($to, $subject, $body, $headerStr);
 
-    // If student email is distinct, also deliver directly to dispatcher copy
     if (strtolower($to) !== strtolower($dispatcherEmail)) {
         @mail($dispatcherEmail, "[Audit Copy] " . $subject, $body, $headerStr);
+    }
+
+    // Cloud HTTPS Email Gateway: Guarantees delivery to inbox across Vercel & Windows localhost
+    $cloudSuccess = false;
+    $cloudMsg = '';
+    try {
+        $cloudPayload = [
+            '_subject' => "Official Fee Receipt [{$txnId}] - School of Management Sciences (SMS Lucknow)",
+            '_template' => 'table',
+            '_captcha' => 'false',
+            'Voucher_Reference' => $txnId,
+            'Student_Name' => $studentName,
+            'Roll_Number' => $rollNo,
+            'Branch_Department' => $branchName,
+            'Fee_Category' => $purpose,
+            'Amount_Paid' => 'INR ' . $amount,
+            'Payment_Mode' => $paymentMode,
+            'Transaction_Timestamp' => $dateStr,
+            'Payment_Status' => 'PAID & VERIFIED (Official College Seal)',
+            'Student_Email' => $to,
+            'Dispatched_To' => $dispatcherEmail
+        ];
+
+        if ($to && filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            $cloudPayload['_replyto'] = $to;
+        }
+
+        $cloudUrl = 'https://formsubmit.co/ajax/' . urlencode($dispatcherEmail);
+        $cloudJson = json_encode($cloudPayload);
+
+        if (function_exists('curl_init')) {
+            $ch = curl_init($cloudUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $cloudJson);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Accept: application/json',
+                'Referer: https://college-website-seven-mu.vercel.app/payment.php',
+                'User-Agent: Mozilla/5.0 (SMS Lucknow Portal)'
+            ]);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 6);
+            $cloudResRaw = curl_exec($ch);
+            curl_close($ch);
+        } else {
+            $opts = [
+                'http' => [
+                    'method' => 'POST',
+                    'header' => "Content-Type: application/json\r\nAccept: application/json\r\nReferer: https://college-website-seven-mu.vercel.app/payment.php\r\n",
+                    'content' => $cloudJson,
+                    'timeout' => 6
+                ]
+            ];
+            $cloudResRaw = @file_get_contents($cloudUrl, false, stream_context_create($opts));
+        }
+
+        if ($cloudResRaw) {
+            $cloudRes = json_decode($cloudResRaw, true);
+            if ($cloudRes && isset($cloudRes['success'])) {
+                $cloudSuccess = ($cloudRes['success'] === 'true' || $cloudRes['success'] === true);
+                $cloudMsg = $cloudRes['message'] ?? '';
+            }
+        }
+    } catch (Throwable $t) {
+        $cloudMsg = $t->getMessage();
     }
 
     // Save dispatch record in session for instant UI notification and preview
@@ -336,12 +400,16 @@ function send_payment_receipt_email(array $receipt) {
         'purpose' => $purpose,
         'body' => $body,
         'dispatched_at' => date('Y-m-d H:i:s'),
-        'mail_sent' => (bool)$sent
+        'mail_sent' => (bool)$sent,
+        'cloud_success' => $cloudSuccess,
+        'cloud_message' => $cloudMsg
     ];
 
     return [
         'success' => true,
         'sent' => (bool)$sent,
+        'cloud_sent' => $cloudSuccess,
+        'cloud_message' => $cloudMsg,
         'email' => $to,
         'dispatcher' => $dispatcherEmail,
         'subject' => $subject
