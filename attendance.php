@@ -289,7 +289,12 @@ function h($str) {
             <button class="btn btn-secondary" onclick="window.print()" style="padding: 8px 16px; font-size: 13px;">
               🖨️ Print Attendance Slip
             </button>
-            <a class="btn" href="payment.php?roll_no=<?= urlencode($student['roll_no']) ?>" style="padding: 8px 16px; font-size: 13px;">
+            <?php if ($percentage >= 75): ?>
+              <a class="btn" href="payment.php?roll_no=<?= urlencode($student['roll_no']) ?>&category=Semester+Examination+Fee&amount=2500" style="padding: 8px 16px; font-size: 13px; background: #10b981;">
+                📝 Pay Exam Fee (₹2,500) →
+              </a>
+            <?php endif; ?>
+            <a class="btn btn-secondary" href="payment.php?roll_no=<?= urlencode($student['roll_no']) ?>" style="padding: 8px 16px; font-size: 13px;">
               💳 Fee Portal →
             </a>
           </div>
@@ -301,7 +306,7 @@ function h($str) {
             <div class="alert alert-success" style="margin-bottom: 0;">
               <span style="font-size: 20px;">✅</span>
               <div>
-                <strong>Eligible for University Examinations:</strong> Current attendance is <strong><?= $percentage ?>%</strong>, which comfortably satisfies the university's mandatory <strong>75% attendance threshold</strong>.
+                <strong>Eligible for University Examinations:</strong> Current attendance is <strong><?= $percentage ?>%</strong>, which comfortably satisfies the university's mandatory <strong>75% attendance threshold</strong>. You are cleared to submit your <strong>Semester Examination Fee</strong>.
               </div>
             </div>
           <?php elseif ($percentage >= 65): ?>

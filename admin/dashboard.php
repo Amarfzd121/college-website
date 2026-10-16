@@ -794,8 +794,18 @@ function h($str) {
               </select>
             </div>
             <div class="form-group">
-              <label>Remarks / Invoice Description</label>
-              <input class="form-control" name="remarks" placeholder="e.g. Semester 5 Tuition Fee">
+              <label>Remarks / Fee Purpose</label>
+              <input class="form-control" name="remarks" list="admin_fee_presets" placeholder="e.g. Semester Examination Fee">
+              <datalist id="admin_fee_presets">
+                <option value="Semester Examination Fee">
+                <option value="Semester Tuition Fee">
+                <option value="Backlog / Re-evaluation Examination Fee">
+                <option value="Admission & Registration Fee">
+                <option value="Semester 5 Tuition Fee">
+                <option value="Semester 3 Management Fee">
+                <option value="Hostel & Mess Charges">
+                <option value="Library & Lab Caution Deposit">
+              </datalist>
             </div>
           </div>
           <button class="btn" type="submit">Issue Fee Voucher</button>

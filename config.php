@@ -160,7 +160,8 @@ function init_sqlite_tables(PDO $pdo) {
         (1, 1, 24500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester 5 Tuition Fee'),
         (2, 2, 24500.00, 'Paid', 'TXN-2026-984321', 'UPI (Google Pay)', datetime('now'), 'Semester 5 Tuition Fee'),
         (3, 3, 31000.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester 3 Management Fee'),
-        (4, 4, 18500.00, 'Paid', 'TXN-2026-773412', 'Net Banking HDFC', datetime('now'), 'Semester 1 Admission Fee')");
+        (4, 4, 18500.00, 'Paid', 'TXN-2026-773412', 'Net Banking HDFC', datetime('now'), 'Semester 1 Admission Fee'),
+        (5, 2, 2500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester Examination Fee')");
 
     $pdo->exec("INSERT OR IGNORE INTO admissions (id, application_no, full_name, email, phone, course_name, qualification, score_percent, address, status) VALUES
         (1, 'APP-2026-1042', 'Neha Gupta', 'neha.gupta@example.com', '9822334455', 'Bachelor of Computer Applications (BCA)', '12th Science / Math', 88.50, 'Lucknow, Uttar Pradesh', 'Approved'),

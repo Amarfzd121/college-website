@@ -84,7 +84,8 @@ INSERT IGNORE INTO fees (id, student_id, amount, status, transaction_id, payment
 (1, 1, 24500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester 5 Tuition Fee'),
 (2, 2, 24500.00, 'Paid', 'TXN-2026-984321', 'UPI (Google Pay)', NOW(), 'Semester 5 Tuition Fee'),
 (3, 3, 31000.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester 3 Management Fee'),
-(4, 4, 18500.00, 'Paid', 'TXN-2026-773412', 'Net Banking HDFC', NOW(), 'Semester 1 Admission Fee');
+(4, 4, 18500.00, 'Paid', 'TXN-2026-773412', 'Net Banking HDFC', NOW(), 'Semester 1 Admission Fee'),
+(5, 2, 2500.00, 'Pending', NULL, 'Pending Payment', NULL, 'Semester Examination Fee');
 
 -- Sample Online Admission Applications
 INSERT IGNORE INTO admissions (id, application_no, full_name, email, phone, course_name, qualification, score_percent, address, status) VALUES

@@ -1169,17 +1169,38 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
 
               <div class="form-group">
                 <label>Fee Category / Purpose *</label>
-                <input class="form-control" name="fee_category" id="inp_category" required list="category_options" value="<?= htmlspecialchars($prefillCategory) ?>" placeholder="Select or type fee category">
-                <datalist id="category_options">
-                  <option value="Semester Tuition Fee">
-                  <option value="Admission & Registration Fee">
-                  <option value="Semester Examination Fee">
-                  <option value="Hostel & Mess Charges">
-                  <option value="Library & Lab Caution Deposit">
-                  <option value="Backlog / Re-evaluation Fee">
-                  <option value="Semester 3 Management Fee">
-                  <option value="Semester 5 Tuition Fee">
-                </datalist>
+                <select class="form-control" name="fee_category" id="inp_category" required style="font-weight: 600; cursor: pointer;">
+                  <option value="Semester Examination Fee" <?= (strpos($prefillCategory, 'Exam') !== false || $prefillCategory === 'Semester Examination Fee') ? 'selected' : '' ?>>
+                    📝 Semester Examination Fee
+                  </option>
+                  <option value="Semester Tuition Fee" <?= ($prefillCategory === 'Semester Tuition Fee' || empty($prefillCategory)) ? 'selected' : '' ?>>
+                    🎓 Semester Tuition Fee
+                  </option>
+                  <option value="Backlog / Re-evaluation Examination Fee" <?= $prefillCategory === 'Backlog / Re-evaluation Examination Fee' ? 'selected' : '' ?>>
+                    📑 Backlog / Re-evaluation Examination Fee
+                  </option>
+                  <option value="Admission & Registration Fee" <?= $prefillCategory === 'Admission & Registration Fee' ? 'selected' : '' ?>>
+                    📋 Admission & Registration Fee
+                  </option>
+                  <option value="Semester 5 Tuition Fee" <?= $prefillCategory === 'Semester 5 Tuition Fee' ? 'selected' : '' ?>>
+                    🎓 Semester 5 Tuition Fee
+                  </option>
+                  <option value="Semester 3 Management Fee" <?= $prefillCategory === 'Semester 3 Management Fee' ? 'selected' : '' ?>>
+                    🎓 Semester 3 Management Fee
+                  </option>
+                  <option value="Hostel & Mess Charges" <?= $prefillCategory === 'Hostel & Mess Charges' ? 'selected' : '' ?>>
+                    🏢 Hostel & Mess Charges
+                  </option>
+                  <option value="Library & Lab Caution Deposit" <?= $prefillCategory === 'Library & Lab Caution Deposit' ? 'selected' : '' ?>>
+                    📚 Library & Lab Caution Deposit
+                  </option>
+                  <option value="Annual Sports & Cultural Fee" <?= $prefillCategory === 'Annual Sports & Cultural Fee' ? 'selected' : '' ?>>
+                    🏆 Annual Sports & Cultural Fee
+                  </option>
+                  <?php if (!empty($prefillCategory) && !in_array($prefillCategory, ['Semester Examination Fee', 'Semester Tuition Fee', 'Backlog / Re-evaluation Examination Fee', 'Admission & Registration Fee', 'Semester 5 Tuition Fee', 'Semester 3 Management Fee', 'Hostel & Mess Charges', 'Library & Lab Caution Deposit', 'Annual Sports & Cultural Fee'])): ?>
+                    <option value="<?= htmlspecialchars($prefillCategory) ?>" selected><?= htmlspecialchars($prefillCategory) ?></option>
+                  <?php endif; ?>
+                </select>
               </div>
             </div>
 
@@ -1202,18 +1223,18 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
                   <span>Payable Amount (INR ₹) *</span>
                   <span style="font-weight: 400; color: var(--accent-teal); font-size: 12px;">✓ 0% Gateway Convenience Fee</span>
                 </label>
-                <input class="form-control" type="number" step="1" min="10" name="amount" id="inp_amount" required placeholder="Enter fee amount" value="<?= htmlspecialchars($prefillAmount ?: '24500') ?>" style="font-size: 22px; font-weight: 700; color: var(--primary);">
+                <input class="form-control" type="number" step="1" min="10" name="amount" id="inp_amount" required placeholder="Enter fee amount" value="<?= htmlspecialchars($prefillAmount ?: (($prefillCategory === 'Semester Examination Fee' || strpos($prefillCategory, 'Exam') !== false) ? '2500' : '24500')) ?>" style="font-size: 22px; font-weight: 700; color: var(--primary);">
               </div>
 
               <!-- Presets -->
               <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Quick Presets:</label>
               <div class="amount-presets">
+                <div class="amount-chip <?= ($prefillAmount == '2500' || strpos($prefillCategory, 'Exam') !== false) ? 'selected' : '' ?>" data-amt="2500" data-category="Semester Examination Fee">₹2,500 (Exam Fee)</div>
                 <div class="amount-chip" data-amt="5000">₹5,000</div>
                 <div class="amount-chip" data-amt="15000">₹15,000</div>
-                <div class="amount-chip <?= (!$prefillAmount || $prefillAmount == '24500') ? 'selected' : '' ?>" data-amt="24500">₹24,500</div>
-                <div class="amount-chip <?= ($prefillAmount == '31000') ? 'selected' : '' ?>" data-amt="31000">₹31,000</div>
+                <div class="amount-chip <?= ((!$prefillAmount && strpos($prefillCategory, 'Exam') === false) || $prefillAmount == '24500') ? 'selected' : '' ?>" data-amt="24500" data-category="Semester Tuition Fee">₹24,500 (Tuition)</div>
+                <div class="amount-chip <?= ($prefillAmount == '31000') ? 'selected' : '' ?>" data-amt="31000" data-category="Semester 3 Management Fee">₹31,000</div>
                 <div class="amount-chip" data-amt="45000">₹45,000</div>
-                <div class="amount-chip" data-amt="52000">₹52,000</div>
               </div>
             </div>
 
@@ -1570,17 +1591,43 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
           chips.forEach(c => c.classList.remove('selected'));
           chip.classList.add('selected');
           const amt = chip.getAttribute('data-amt');
+          const cat = chip.getAttribute('data-category');
           if (amtInput) {
             amtInput.value = amt;
             updateAmounts(amt);
+          }
+          if (cat && categoryInput) {
+            categoryInput.value = cat;
+            if (sumPurpose) sumPurpose.textContent = cat;
           }
         });
       });
 
       if (categoryInput && sumPurpose) {
-        categoryInput.addEventListener('input', () => {
-          sumPurpose.textContent = categoryInput.value || 'Semester Tuition Fee';
-        });
+        const syncCat = () => {
+          const val = categoryInput.value || 'Semester Tuition Fee';
+          sumPurpose.textContent = val;
+          // Auto-adjust suggested amount if user selects Examination Fee
+          if (val === 'Semester Examination Fee') {
+            if (amtInput && (!amtInput.value || amtInput.value === '24500')) {
+              amtInput.value = '2500';
+              updateAmounts('2500');
+              chips.forEach(c => {
+                c.classList.toggle('selected', c.getAttribute('data-amt') === '2500');
+              });
+            }
+          } else if (val === 'Semester Tuition Fee') {
+            if (amtInput && amtInput.value === '2500') {
+              amtInput.value = '24500';
+              updateAmounts('24500');
+              chips.forEach(c => {
+                c.classList.toggle('selected', c.getAttribute('data-amt') === '24500');
+              });
+            }
+          }
+        };
+        categoryInput.addEventListener('change', syncCat);
+        categoryInput.addEventListener('input', syncCat);
       }
 
       // Dynamic Student Lookup when typing Roll No
@@ -1617,7 +1664,18 @@ if (isset($_GET['search_query']) && trim($_GET['search_query']) !== '') {
                       updateAmounts(pf.amount);
                     }
                     if (categoryInput) {
-                      categoryInput.value = pf.remarks;
+                      let foundOpt = false;
+                      for (let i = 0; i < categoryInput.options.length; i++) {
+                        if (categoryInput.options[i].value === pf.remarks) {
+                          categoryInput.selectedIndex = i;
+                          foundOpt = true;
+                          break;
+                        }
+                      }
+                      if (!foundOpt && pf.remarks) {
+                        const opt = new Option(pf.remarks, pf.remarks, true, true);
+                        categoryInput.add(opt);
+                      }
                       if (sumPurpose) sumPurpose.textContent = pf.remarks;
                     }
                     if (rollIndicator) {
